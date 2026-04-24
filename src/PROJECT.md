@@ -1,11 +1,12 @@
-## PROJECT.md — InvoiceKit
+# PROJECT.md — InvoiceKit
 
 ## What I Built
 
 InvoiceKit is a lightweight invoicing and subscription mock micro-SaaS application built for freelancers. It lets users manage clients, create and send invoices with dynamic line items, track expenses, simulate recurring billing, export invoices as PDF or CSV, and view an audit trail of all actions. The app uses Supabase as its Backend-as-a-Service for authentication, database persistence, file storage, and serverless functions.
 
-The application is a single-page React app (React + Vite + TypeScript) packaged in one file (`App.tsx`) that demonstrates component design, state management, authentication, routing, server communication, and BaaS integration.
+The application is a single-page React app (React + Vite) packaged in one file (`App.jsx`) that demonstrates component design, state management, authentication, routing, server communication, and BaaS integration.
 
+---
 
 ## Features
 
@@ -140,16 +141,38 @@ Session tokens are managed by the Supabase client library and persisted in local
 
 ## Project Structure
 
-The entire application is in a single file (`App.tsx`) for simplicity and portability. In a production environment, it would be split into:
+The entire application lives in a single file (`src/App.jsx`). This is intentional for a course project — it makes the full architecture readable top-to-bottom without jumping between files, and simplifies sharing, reviewing, and submission.
 
 ```
-src/
-├── lib/supabase.ts          — Supabase client + db layer
-├── contexts/                 — AuthCtx, DataCtx, ThemeCtx, RouterCtx
-├── components/atoms/         — Btn, Inp, Card, Badge
-├── pages/                    — Dashboard, Invoices, Clients, etc.
-└── App.tsx                   — Shell + AuthGate
+invoicekit/
+├── src/
+│   ├── App.jsx        — All components, contexts, routing, DB layer, and pages
+│   ├── App.css        — Global styles
+│   ├── main.tsx       — Vite entry point (renders <App />)
+│   └── Project.md     — Documentation
+├── .env               — VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+├── index.html         — Vite HTML template
+├── package.json       — Dependencies (react, lucide-react, @supabase/supabase-js)
+├── vite.config.ts     — Vite configuration
+├── tsconfig.json      — TypeScript configuration (strict mode disabled)
+└── PROJECT.md         — This documentation
 ```
+
+When you run `npm run dev`, Vite serves `App.jsx` which contains everything in this order:
+
+1. Icon imports and Supabase client initialization
+2. Theme system (`makeTheme`, `ThemeCtx`)
+3. `supabaseDb` layer (camelCase ↔ snake_case mapping for all CRUD operations)
+4. Helper functions (`fmtC`, `fmtD`, `calcT`, `nextNum`, `genId`)
+5. `AuthProvider` (sign in/up/out, session persistence)
+6. `DataProvider` (invoices, clients, settings state + CRUD actions + reminder scheduling)
+7. `RouterProvider` (client-side routing with history stack)
+8. Atom components (`Btn`, `Inp`, `Card`, `Badge`)
+9. `AuthScreen` (sign in/up form)
+10. `Sidebar` (navigation)
+11. Page components (Dashboard, Invoice List/Form/Detail, Clients, Recurring Simulation, Expenses, Audit Trail, Settings)
+12. `AppShell` (layout wrapper with theme + sidebar + page rendering)
+13. `App` export + `AuthGate` (root component that decides auth screen vs app shell)
 
 ### Component Hierarchy
 
@@ -172,7 +195,7 @@ App
 ## How to Run
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/tuned-any/invoicekit.git
 cd invoicekit
 npm install
 ```
@@ -180,9 +203,8 @@ npm install
 Create a `.env` file:
 
 ```
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-```
+VITE_SUPABASE_URL=https://hrmtkvzattiegctjxilu.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhybXRrdnphdHRpZWdjdGp4aWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NDQzMDMsImV4cCI6MjA5MjEyMDMwM30.3YFlL6v583yWC-Eaco3x5IXiedNoQ26-WByyb7uXQHc
 
 Run the migrations in Supabase SQL Editor, then:
 
